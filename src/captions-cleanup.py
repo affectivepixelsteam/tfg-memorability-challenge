@@ -28,7 +28,7 @@ with open (path, 'r', encoding="utf-8") as captions_file:
         caption_text = ' '.join(caption_text.split('-'))
 
         # Store them in array
-        final_string += video_id + ',' + caption_text
+        final_string += video_id.strip() + ',' + caption_text.strip() + "\n"
 
 
 with open(path_to_write, 'w', encoding="utf-8") as cleanup_file:
