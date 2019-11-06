@@ -5,10 +5,12 @@ from keras.models import model_from_json
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
-model_path = '../models/word2vec/word2vec-model.json'
-weight_path = '../models/word2vec/word2vec-weight.h5'
-captions_file_path = '../corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
-ground_truth_file_path = '../corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
+
+ROOT_PATH = "/mnt/RESOURCES/TFG_TFM_CORPUS/"
+model_path = ROOT_PATH+'models/word2vec/word2vec-model.json'
+weight_path = ROOT_PATH+'models/word2vec/word2vec-weight.h5'
+captions_file_path = ROOT_PATH+'corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+ground_truth_file_path = ROOT_PATH+'corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
 
 # load json and create model
 with open(model_path, 'r') as model_file:
@@ -34,13 +36,14 @@ tokenizer.fit_on_texts(df_captions.captions.tolist())
 captions_sequece = tokenizer.texts_to_sequences(df_captions.captions)
 
 # add paddings.
-captions_sequece = pad_sequences(captions_sequece)
+captions_sequece = pad_sequences(captions_sequece, maxlen=10)
  
 Y = df_ground_truth['short-term_memorability'].to_numpy()
 
 # predict
-model.compile(optimizer='adagrad', loss='mean_squared_error', metrics=["mean_squared_error"])
+#model.compile(optimizer='adagrad', loss='mean_squared_error', metrics=["mean_squared_error"])
 
-ypred = model.predict(captions_sequece[0])
+input_x = captions_sequece[0].reshape(1,10)
+ypred = model.predict([input_x])
 
 print ('ypred:' + str(ypred) + 'yreal:' + str(Y[0]))

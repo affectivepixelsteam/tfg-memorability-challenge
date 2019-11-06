@@ -21,7 +21,7 @@ import utils.simple_callback as simple_callback
 from keras.callbacks import TensorBoard
 
 # Path to file
-ROOT_PATH = '../'
+ROOT_PATH = '/mnt/RESOURCES/TFG_TFM_CORPUS/'
 captions_file_path = ROOT_PATH+'corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
 embeddings_file_path = ROOT_PATH+'corpus/devset/dev-set/embeddings-for-each-word.csv'
 ground_truth_file_path = ROOT_PATH+'corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
@@ -29,10 +29,10 @@ ground_truth_file_path = ROOT_PATH+'corpus/devset/dev-set/ground-truth/ground-tr
 model_save_path = ROOT_PATH+'models/word2vec/word2vec-model.json'
 weight_save_path = ROOT_PATH+'models/word2vec/word2vec-weight.h5'
 #model parameters:
-batch_size = 64
-timesteps = 40
+batch_size = 32
+timesteps = 10
 emb_dim = 300
-units_lstm = 100
+units_lstm = 300
 epochs = 10
 
 df_embeddings = pd.read_csv(embeddings_file_path)
@@ -100,7 +100,7 @@ model.summary()
 history = model.fit(X_train, y_train,
                     epochs=epochs,
                     batch_size=batch_size,
-                    validation_split=0.2, verbose=1, callbacks=[tensorboard])#,callbacks=[callb, tensorboard]
+                    validation_split=0.2, verbose=1, callbacks=[])#,callbacks=[callb, tensorboard]
 
 
 score, acc= model.evaluate(X_test, y_test)
@@ -109,4 +109,21 @@ print('Test score with LSTM:', score)
 print('Test accuracy with LSTM:', acc)
 
 # Save model and weights
-#...
+
+with open(model_save_path, 'w+') as save_file:
+    save_file.write(model.to_json())
+
+with open(weight_save_path, 'w+') as save_file:
+    model.save_weights(weight_save_path)
+
+# Plotting lost
+plt.suptitle('Optimizer : adagrad', fontsize=10)
+plt.ylabel('Loss', fontsize=16)
+plt.xlabel('Epoch', fontsize=14)
+plt.plot(history.history['loss'], color='b', label='Training Loss')
+plt.legend(loc='upper right')
+
+# Save img
+#plt.savefig('../figures/word2vec_train_loss_class.png')
+
+plt.show()
