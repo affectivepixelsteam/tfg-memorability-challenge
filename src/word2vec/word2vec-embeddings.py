@@ -10,10 +10,12 @@ from keras.preprocessing.text import Tokenizer
 print('Starting...')
 
 # Path to file
-captions_file_path = '../corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+save_file_path = '../../data/corpus/devset/dev-set/embeddings-for-each-word.csv'
+word2vec_google_model_path = '../../data/models/GoogleNews-vectors-negative300.bin'
 
 # Load word2vec Google's pretrained model
-word_vectors = KeyedVectors.load_word2vec_format('../corpus/models/GoogleNews-vectors-negative300.bin', binary=True)
+word_vectors = KeyedVectors.load_word2vec_format(word2vec_google_model_path, binary=True)
 print ('Word2vec model loaded')
 
 # Load captions file
@@ -50,7 +52,6 @@ embedding_file = pd.DataFrame(embedding_matrix)
 print('Got embedding matrix')
 
 # Save embeddings for each word.
-save_file_path = '../corpus/devset/dev-set/embeddings-for-each-word.csv'
 embedding_file.to_csv(save_file_path)
 
 print('Saved')

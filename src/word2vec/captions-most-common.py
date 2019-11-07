@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from collections import Counter
 
 # Path of captions file
-captions_file_path = '../corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+img_file_path = '../../figures/most_common_words.png'
 
 # Read csv
 captions_file = pd.read_csv(captions_file_path)
@@ -27,7 +28,7 @@ plt.xticks(indexes + width * 0.5, labels)
 plt.xticks(rotation=90)
 
 # Save img
-plt.savefig('../figures/most_common_words.png')
+plt.savefig(img_file_path)
 
 # Show it.
 plt.show()

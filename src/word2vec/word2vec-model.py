@@ -18,9 +18,16 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 # Path to file
-captions_file_path = '../corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
-embeddings_file_path = '../corpus/devset/dev-set/embeddings-for-each-word.csv'
-ground_truth_file_path = '../corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
+captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+embeddings_file_path = '../../data/corpus/devset/dev-set/embeddings-for-each-word.csv'
+ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
+
+# Path model and weights
+model_save_path = '../../models/word2vec/word2vec-model.json'
+weight_save_path = '../../models/word2vec/word2vec-weight.h5'
+
+# Path for image
+img_file_path = '../../figures/word2vec_train_loss_class.png'
 
 df_embeddings = pd.read_csv(embeddings_file_path)
 df_captions = pd.read_csv(captions_file_path)
@@ -77,9 +84,6 @@ score, acc = model.evaluate(X_test, y_test,
 print('Test score with LSTM:', score)
 print('Test accuracy with LSTM:', acc)
 
-# Save model and weights
-model_save_path = '../models/word2vec/word2vec-model.json'
-weight_save_path = '../models/word2vec/word2vec-weight.h5'
 
 with open(model_save_path, 'w+') as save_file:
     save_file.write(model.to_json())
@@ -94,6 +98,6 @@ plt.plot(history.history['loss'], color='b', label='Training Loss')
 plt.legend(loc='upper right')
 
 # Save img
-plt.savefig('../figures/word2vec_train_loss_class.png')
+plt.savefig(img_file_path)
 
 plt.show()

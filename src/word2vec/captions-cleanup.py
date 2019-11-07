@@ -3,10 +3,10 @@
 import re
 
 # Path of captions file
-path = '../corpus/devset/dev-set/dev-set_video-captions.txt'
+path = '../../data/corpus/devset/dev-set/dev-set_video-captions.txt'
 
 # Path to write cleanup file
-path_to_write = '../corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+path_to_write = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
 
 # Open file
 with open (path, 'r', encoding="utf-8") as captions_file:
