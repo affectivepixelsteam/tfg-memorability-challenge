@@ -18,9 +18,9 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 # Path to file
-captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup_splitted.csv'
 embeddings_file_path = '../../data/corpus/devset/dev-set/embeddings-for-each-word.csv'
-ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
+ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set_splitted.csv'
 
 # Path model and weights
 model_save_path = '../../models/word2vec/word2vec-model.json'
@@ -42,7 +42,7 @@ tokenizer.fit_on_texts(df_captions.captions.tolist())
 captions_sequece = tokenizer.texts_to_sequences(df_captions.captions)
 
 # add paddings.
-captions_sequece = pad_sequences(captions_sequece, maxlen=10)
+captions_sequece = pad_sequences(captions_sequece)
 
 # Now get the embedding matrix.
 embedding_matrix = df_embeddings.iloc[:,1:].to_numpy()
@@ -73,7 +73,7 @@ model.compile(optimizer='adagrad', loss='binary_crossentropy', metrics=['binary_
 model.summary()
 
 history = model.fit(X_train, y_train,
-                    epochs=10,
+                    epochs=50,
                     batch_size=32,
                     validation_split=0.2)
 

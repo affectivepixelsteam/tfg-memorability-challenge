@@ -38,7 +38,7 @@ captions_sequece = tokenizer.texts_to_sequences(df_captions.captions)
 # add paddings.
 captions_sequece = pad_sequences(captions_sequece, maxlen=10)
  
-Y = df_ground_truth['short-term_memorability'].to_numpy()
+Y = df_ground_truth['long-term_memorability'].to_numpy()
 
 # predict
 #model.compile(optimizer='adagrad', loss='mean_squared_error', metrics=["mean_squared_error"])
