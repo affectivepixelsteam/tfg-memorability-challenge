@@ -52,6 +52,6 @@ def extract_FPS_from_video(video_name, input_video_path, output_path, format_img
     
 input_video_path = "../../data/corpus/devset/dev-set/sources"
 output_path = "/media/marcoscollado/gth10b/tfg-memorabilty-challenge"
-img_width = 640
+img_width = 848
 img_heigh = 480
 extract_FPS_parallel(input_video_path, output_path)
