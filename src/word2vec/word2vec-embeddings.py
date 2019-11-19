@@ -10,7 +10,7 @@ from keras.preprocessing.text import Tokenizer
 print('Starting...')
 
 # Path to file
-captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup_splitted.csv'
 save_file_path = '../../data/corpus/devset/dev-set/embeddings-for-each-word.csv'
 word2vec_google_model_path = '../../data/models/GoogleNews-vectors-negative300.bin'
 
