@@ -5,10 +5,10 @@ from functools import partial
 
 def getDatabaseSplitted() :
     # Path
-    splitted_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set_splitted.csv'
+    ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
     
     # load dataframes
-    df_ground_truth = pd.read_csv(splitted_ground_truth_file_path)
+    df_ground_truth = pd.read_csv(ground_truth_file_path)
 
     return df_ground_truth['video'].values
 
