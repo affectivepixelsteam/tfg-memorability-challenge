@@ -10,7 +10,7 @@ from keras.preprocessing.text import Tokenizer
 print('Starting...')
 
 # Path to file
-captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup_splitted.csv'
+train_captions_file_path = '../../data/corpus/devset/dev-set/train_dev-set_video-captions-cleanup_splitted.csv'
 save_file_path = '../../data/corpus/devset/dev-set/embeddings-for-each-word.csv'
 word2vec_google_model_path = '../../data/models/GoogleNews-vectors-negative300.bin'
 
@@ -19,12 +19,12 @@ word_vectors = KeyedVectors.load_word2vec_format(word2vec_google_model_path, bin
 print ('Word2vec model loaded')
 
 # Load captions file
-captions_file = pd.read_csv(captions_file_path)
+df_train_captions = pd.read_csv(train_captions_file_path)
 
 # So first we get every word in our captions and stored them without repetition.
 # Filter whitespaces too.
 tokenizer = Tokenizer(filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n ')
-tokenizer.fit_on_texts(captions_file.captions.tolist())
+tokenizer.fit_on_texts(df_train_captions.captions.tolist())
 word_index = tokenizer.word_index
 
 # length of vectors from word2vec model.
