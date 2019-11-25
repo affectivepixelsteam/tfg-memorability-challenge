@@ -17,9 +17,11 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 # Path to file
-captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup_splitted.csv'
+train_captions_file_path = '../../data/corpus/devset/dev-set/train_dev-set_video-captions-cleanup_splitted.csv'
+test_captions_file_path = '../../data/corpus/devset/dev-set/test_dev-set_video-captions-cleanup_splitted.csv'
 embeddings_file_path = '../../data/corpus/devset/dev-set/tf-idf_embeddings.csv'
-ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set_splitted.csv'
+train_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set_splitted.csv'
+test_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/test_ground-truth_dev-set_splitted.csv'
 
 # Path model and weights
 model_save_path = '../../models/tf-idf/tf-idf_model.json'
@@ -28,20 +30,25 @@ weight_save_path = '../../models/tf-idf/tf-idf_weight.h5'
 # Path for image
 img_file_path = '../../figures/tf-idf_train_loss_class.png'
 
+# Load dataframes
 df_embeddings = pd.read_csv(embeddings_file_path)
-df_captions = pd.read_csv(captions_file_path)
-df_ground_truth = pd.read_csv(ground_truth_file_path)
+df_train_captions = pd.read_csv(train_captions_file_path)
+df_test_captions = pd.read_csv(test_captions_file_path)
+df_train_ground_truth = pd.read_csv(train_ground_truth_file_path)
+df_test_ground_truth = pd.read_csv(test_ground_truth_file_path)
 
 # So first we get every word in our captions and stored them without repetition.
 # Filter whitespaces too.
 tokenizer = Tokenizer(filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n ')
-tokenizer.fit_on_texts(df_captions.captions.tolist())
+tokenizer.fit_on_texts(df_train_captions.captions.tolist())
 
 # captions to sequece
-captions_sequece = tokenizer.texts_to_sequences(df_captions.captions)
+train_captions_sequece = tokenizer.texts_to_sequences(df_train_captions.captions)
+test_captions_sequece = tokenizer.texts_to_sequences(df_test_captions.captions)
 
 # add paddings.
-captions_sequece = pad_sequences(captions_sequece)
+train_captions_sequece = pad_sequences(train_captions_sequece)
+test_captions_sequece = pad_sequences(test_captions_sequece)
 
 # Now get the embedding matrix.
 embedding_matrix = df_embeddings.iloc[:,1:].to_numpy()
@@ -53,11 +60,11 @@ def to_classifier(x) :
         return 1
     return 0
 
-Y = df_ground_truth['long-term_memorability'].apply(to_classifier).to_numpy()
+y_train = df_train_ground_truth['long-term_memorability'].apply(to_classifier).to_numpy()
+y_test = df_test_ground_truth['long-term_memorability'].apply(to_classifier).to_numpy()
 
-X = captions_sequece
-
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.4, random_state=123)
+X_train = train_captions_sequece
+X_test  = test_captions_sequece
 
 # Now define the model
 model = Sequential()

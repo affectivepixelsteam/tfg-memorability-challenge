@@ -19,14 +19,17 @@ def stopwords_remover(document):
     return result
 
 # Paths to dataset
-splitted_captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup_splitted.csv'
+train_captions_file_path = '../../data/corpus/devset/dev-set/train_dev-set_video-captions-cleanup_splitted.csv'
+train_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set_splitted.csv'
 tf_idf_embeddings_file_path = '../../data/corpus/devset/dev-set/tf-idf_embeddings.csv'
 
 # Load it
-df_captions = pd.read_csv(splitted_captions_file_path)
+df_train_captions = pd.read_csv(train_captions_file_path)
+df_train_ground_truth = pd.read_csv(train_ground_truth_file_path)
 
 # Split dataset in two halfs. First half are the higher memorable videos and the other half are the lower ones.
-df_high_memorable, df_low_memorable = np.split(df_captions, [int(0.5*len(df_captions))])
+df_high_memorable = df_train_captions[df_train_captions.id.isin(df_train_ground_truth[df_train_ground_truth['long-term_memorability'] > 0.7]['video'])]
+df_low_memorable = df_train_captions[df_train_captions.id.isin(df_train_ground_truth[df_train_ground_truth['long-term_memorability'] < 0.7]['video'])]
 
 # Get both documents and remove stopwords from it
 high_memorable_captions = df_high_memorable["captions"].str.cat(sep=' ')
@@ -42,7 +45,7 @@ df_tfidf = pd.DataFrame(denselist, columns=feature_names).T
 
 # Now tokenize our captions to transform each word to its respective integer
 tokenizer = Tokenizer(filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n ')
-tokenizer.fit_on_texts(df_captions.captions.tolist())
+tokenizer.fit_on_texts(df_train_captions.captions.tolist())
 
 # words to integer
 words_as_integers = []
