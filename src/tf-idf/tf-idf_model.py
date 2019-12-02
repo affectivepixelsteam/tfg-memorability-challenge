@@ -90,7 +90,7 @@ score, acc = model.evaluate(X_test, y_test,
 print('Test score with LSTM:', score)
 print('Test accuracy with LSTM:', acc)
 
-
+# Save model
 with open(model_save_path, 'w+') as save_file:
     save_file.write(model.to_json())
 

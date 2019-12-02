@@ -88,7 +88,7 @@ model.compile(optimizer='adagrad', loss='binary_crossentropy', metrics=['binary_
 model.summary()
 
 history = model.fit(X_train, y_train,
-                    epochs=10,
+                    epochs=50,
                     batch_size=32,
                     validation_split=0.2)
 
