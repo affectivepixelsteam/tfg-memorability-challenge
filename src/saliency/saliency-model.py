@@ -17,7 +17,7 @@ from keras.optimizers import adam
 from keras.backend.tensorflow_backend import set_session
 
 # Path
-train_videos_folder_path = "/media/marcoscollado/gth10b/saliency"
+train_videos_folder_path = "/mnt/RESOURCES/saliency"
 
 # Path model and weights
 model_save_path = '../../models/saliency/saliency_model.json'
@@ -54,41 +54,47 @@ def train_images():
     train_generator = train_im.flow_from_directory (
             train_videos_folder_path, 
              target_size=img_size,
-             color_mode='rgb',
-             batch_size=100,
+             color_mode='grayscale',
+             batch_size=50,
              shuffle = True,
-             class_mode='categorical')
-    x =  train_generator
-    return x[0][0], x[0][1]
+             class_mode='input')
+    return train_generator
 
 #ENCODER
 inp = Input(input_size)
-e = Conv2D(filters=32, kernel_size=(3, 3), activation='relu')(inp)
+e = Conv2D(filters=32, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(inp)
 e = MaxPooling2D(pooling_size)(e)
-e = Conv2D(filters=64, kernel_size=(3, 3), activation='relu')(e)
+e = Conv2D(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(e)
 e = MaxPooling2D(pooling_size)(e)
-e = Conv2D(filters=128, kernel_size=(3, 3), activation='relu')(e)
+e = Conv2D(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(e)
 l = Flatten()(e)
-l = Dense(5076, activation='softmax')(l)
+l = Dense(336, activation='softmax')(l)
 
 #DECODER
-d = Reshape((94,54,1))(l)
-d = Conv2DTranspose(filters=128, kernel_size=(3, 3), strides=2, activation='relu', padding='same')(d)
+d = Reshape((24, 14, 1))(l)
+d = Conv2DTranspose(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(d)
 d = BatchNormalization()(d)
-d = Conv2DTranspose(filters=64, kernel_size=(3, 3), strides=2, activation='relu', padding='same')(d)
+d = Conv2DTranspose(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(d)
 d = BatchNormalization()(d)
-d = Conv2DTranspose(filters=32, kernel_size=(3, 3), activation='relu', padding='same')(d)
-decoded = Conv2D(filters=1, kernel_size=(3, 3), activation='sigmoid', padding='same')(d)
+d = Conv2DTranspose(filters=32, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(d)
+d = BatchNormalization()(d)
+d = Conv2DTranspose(filters=32, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(d)
+decoded = Conv2D(filters=1, kernel_size=(5, 5), activation='sigmoid', padding='same')(d)
 
 ae = Model(inp, decoded)
 ae.summary()
 
 
 # compile it using adam optimizer
-ae.compile(optimizer="adam", loss="mse")
+ae.compile(optimizer="adam", loss="binary_crossentropy")
 
 #Train it by providing training images
-history = ae.fit(train_images, train_images, epochs=2)
+train_generator = train_images()
+STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
+history = ae.fit_generator(generator=train_generator,
+                    steps_per_epoch=STEP_SIZE_TRAIN,
+                    epochs=10
+)
 
 # Save model
 with open(model_save_path, 'w+') as save_file:
