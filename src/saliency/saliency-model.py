@@ -3,7 +3,7 @@
 # Then these features of each frame in video we will be loaded to a lstm network in order to retrieve
 # the features for each video.
 
-import tensorflow
+import tensorflow as tf
 import keras
 import pandas as pd
 import numpy as np
@@ -14,6 +14,7 @@ from keras.models import Model, Sequential
 from keras.layers import Dense, Conv2D, Dropout, BatchNormalization, Input, Reshape, Flatten, Deconvolution2D, Conv2DTranspose, MaxPooling2D, UpSampling2D
 from keras.layers.advanced_activations import LeakyReLU
 from keras.optimizers import adam
+from keras.backend.tensorflow_backend import set_session
 
 # Path
 train_videos_folder_path = "/media/marcoscollado/gth10b/saliency"
@@ -30,6 +31,19 @@ img_size = (384, 224)
 input_size = (384, 224, 1)
 pooling_size = (2,2)
 
+# Allow GPU growth
+# INITIAL CONFIG FOR SHARING GPU RESOURCES
+config = tf.ConfigProto()
+
+# dynamically grow the memory used on the GPU
+config.gpu_options.allow_growth = True
+
+# config.gpu_options.per_process_gpu_memory_fraction=0.33
+#config.allow_soft_placement=True
+#config.log_device_placement=False
+
+sess = tf.Session(config=config)
+set_session(sess)  # set this TensorFlow session as the default session for Keras
 
 train_im = ImageDataGenerator(
                rescale=1./255,
