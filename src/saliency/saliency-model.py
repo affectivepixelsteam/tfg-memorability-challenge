@@ -3,6 +3,7 @@
 # Then these features of each frame in video we will be loaded to a lstm network in order to retrieve
 # the features for each video.
 
+import os
 import tensorflow as tf
 import keras
 import pandas as pd
@@ -20,6 +21,7 @@ from keras.backend.tensorflow_backend import set_session
 train_videos_folder_path = "/mnt/RESOURCES/saliency"
 
 # Path model and weights
+save_folder_path = '../../models/saliency/'
 model_save_path = '../../models/saliency/saliency_model.json'
 weight_save_path = '../../models/saliency/saliency_weight.h5'
 
@@ -99,6 +101,7 @@ history = ae.fit_generator(generator=train_generator,
 )
 
 # Save model
+os.makedirs(save_folder_path, exist_ok=True)
 with open(model_save_path, 'w+') as save_file:
     save_file.write(ae.to_json())
 ae.save_weights(weight_save_path)
