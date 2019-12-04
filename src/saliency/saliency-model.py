@@ -68,10 +68,12 @@ e = Conv2D(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding
 e = MaxPooling2D(pooling_size)(e)
 e = Conv2D(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(e)
 l = Flatten()(e)
-l = Dense(336, activation='softmax')(l)
+l = Dense(84, activation='softmax')(l)
 
 #DECODER
-d = Reshape((24, 14, 1))(l)
+d = Reshape((12, 7, 1))(l)
+d = Conv2DTranspose(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(d)
+d = BatchNormalization()(d)
 d = Conv2DTranspose(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(d)
 d = BatchNormalization()(d)
 d = Conv2DTranspose(filters=64, kernel_size=(5, 5), strides=2, activation='relu', padding='same')(d)
