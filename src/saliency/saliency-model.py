@@ -57,7 +57,7 @@ def train_images():
             train_videos_folder_path, 
              target_size=img_size,
              color_mode='grayscale',
-             batch_size=50,
+             batch_size=16,
              shuffle = True,
              class_mode='input')
     return train_generator
