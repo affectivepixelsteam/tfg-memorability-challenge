@@ -49,7 +49,7 @@ set_session(sess)  # set this TensorFlow session as the default session for Kera
 
 train_im = ImageDataGenerator(
                rescale=1./255,
-               shear_range=0.2,
+               shear_range=0.0,
                horizontal_flip=False)
 
 def train_images():
@@ -88,9 +88,8 @@ decoded = Conv2D(filters=1, kernel_size=(5, 5), activation='sigmoid', padding='s
 ae = Model(inp, decoded)
 ae.summary()
 
-
 # compile it using adam optimizer
-ae.compile(optimizer="adam", loss="binary_crossentropy")
+ae.compile(optimizer="adam", loss="binary_crossentropy", metrics=['mean_squared_error'])
 
 #Train it by providing training images
 train_generator = train_images()
