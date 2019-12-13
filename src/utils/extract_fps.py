@@ -3,7 +3,7 @@ import os, time, multiprocessing
 import pandas as pd
 from functools import partial
 
-def getDatabaseSplitted() :
+def getVideoNames() :
     # Path
     ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
     
@@ -13,7 +13,7 @@ def getDatabaseSplitted() :
     return df_ground_truth['video'].values
 
 def extract_FPS_parallel(input_video_path, output_path):
-    list_videos = getDatabaseSplitted()
+    list_videos = getVideoNames()
 
     start_time = time.time()
     pool = multiprocessing.Pool()  # processes = 7
