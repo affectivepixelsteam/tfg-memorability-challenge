@@ -1,0 +1,1 @@
+{"task": "aesthetics", "root": null, "e": 10, "multiinstance": true, "include_misc": false, "data_from_file": "results/exportAva_whole.txt", "num_folds": 10, "load_model": null, "angle": 0, "img_shift": 0, "zoom": 0, "flip": false, "size": 224, "lr": 0.001, "with_decay": false, "bs": 64, "early_stop": 10, "results_dir": "results", "seed": 1234, "v, __verbose": false}
