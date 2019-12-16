@@ -7,18 +7,23 @@ from keras.models import Model
 from PIL import Image
 from skimage import transform
 
-image_path = '/mnt/RESOURCES/saliency/'
-embeddings_output = '../../data/corpus/devset/dev-set/saliency_embeddings.csv'
+train_image_path = '/mnt/RESOURCES/saliency/train/'
+test_image_path = '/mnt/RESOURCES/saliency/test/'
+train_embeddings_output = '../../data/corpus/devset/dev-set/train_saliency_embeddings.csv'
+teest_embeddings_output = '../../data/corpus/devset/dev-set/test_saliency_embeddings.csv'
 model_path = '../../models/saliency/saliency_model.json'
 weight_path = '../../models/saliency/saliency_weight.h5'
 
 EMBEDDING_LENGTH = 84
 
 
-def getVideoNames():
+def getVideoNames(isTrain):
     # Path
-    ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
-
+    if isTrain:
+        ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set.csv'
+    else:
+        ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/test_ground-truth_dev-set.csv'
+    
     # load dataframes
     df_ground_truth = pd.read_csv(ground_truth_file_path)
 
@@ -53,13 +58,14 @@ intermediate_output_model = Model(
 
 
 # Get video names
-list_video_names = getVideoNames()
+list_video_names = getVideoNames(True)
 
 # Create array in which we will save the embeddings
 data = []
 
 # For each video, lookup for its folder and get from every image in its folder the embedding. Finally, save the embedding in the csv
 for video_name in list_video_names:
+  video_name = video_name.split('.')[0]
   video_folder = os.path.join(image_path, video_name)
   images = [f for f in os.listdir(video_folder) if os.path.isfile(os.path.join(video_folder, f))]
 
