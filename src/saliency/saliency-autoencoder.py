@@ -18,12 +18,13 @@ from keras.optimizers import adam
 from keras.backend.tensorflow_backend import set_session
 
 # Path
-train_videos_folder_path = "/mnt/RESOURCES/saliency"
+train_videos_folder_path = "/mnt/RESOURCES/saliency/train"
+test_videos_folder_path = "/mnt/RESOURCES/saliency/test"
 
 # Path model and weights
 save_folder_path = '../../models/saliency/'
-model_save_path = '../../models/saliency/saliency_model.json'
-weight_save_path = '../../models/saliency/saliency_weight.h5'
+model_save_path = '../../models/saliency/saliency_autoencoder_model.json'
+weight_save_path = '../../models/saliency/saliency_autoencoder_weight.h5'
 
 # Path for image
 img_file_path = '../../figures/saliency-autoencoder_train_loss.png'
@@ -50,17 +51,41 @@ set_session(sess)  # set this TensorFlow session as the default session for Kera
 train_im = ImageDataGenerator(
                rescale=1./255,
                shear_range=0.0,
-               horizontal_flip=False)
+               horizontal_flip=False,
+               validation_split=0.1)
 
-def train_images():
+test_im = ImageDataGenerator(rescale=1./255)
+
+
+def train_val_images():
     train_generator = train_im.flow_from_directory (
             train_videos_folder_path, 
              target_size=img_size,
              color_mode='grayscale',
              batch_size=16,
              shuffle = True,
+             class_mode='input',
+             subset='training')
+
+    validation_generator = train_im.flow_from_directory (
+            train_videos_folder_path, 
+             target_size=img_size,
+             color_mode='grayscale',
+             batch_size=16,
+             shuffle = True,
+             class_mode='input',
+             subset='validation')
+    return train_generator, validation_generator
+
+def test_images():
+    test_generator = test_im.flow_from_directory (
+            test_videos_folder_path, 
+             target_size=img_size,
+             color_mode='grayscale',
+             batch_size=16,
+             shuffle = True,
              class_mode='input')
-    return train_generator
+    return test_generator
 
 #ENCODER
 inp = Input(input_size)
@@ -92,12 +117,25 @@ ae.summary()
 ae.compile(optimizer="adam", loss="binary_crossentropy", metrics=['mean_squared_error'])
 
 #Train it by providing training images
-train_generator = train_images()
-STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
+train_generator, validation_generator = train_val_images()
+test_generator = test_images()
+STEP_SIZE_TRAIN = train_generator.n//train_generator.batch_size
+STEP_SIZE_VALIDATION = validation_generator.n//validation_generator.batch_size
+STEP_SIZE_TEST = test_generator.n//test_generator.batch_size
+
 history = ae.fit_generator(generator=train_generator,
                     steps_per_epoch=STEP_SIZE_TRAIN,
-                    epochs=10
+                    epochs=10,
+                    validation_data = validation_generator,
+                    validation_steps = STEP_SIZE_VALIDATION
 )
+
+score, acc = ae.evaluate_generator(generator=test_generator,
+                    steps=STEP_SIZE_TEST,
+                    use_multiprocessing=True)
+
+print('Test score:', score)
+print('Test accuracy:', acc)
 
 # Save model
 os.makedirs(save_folder_path, exist_ok=True)
@@ -112,6 +150,7 @@ plt.suptitle('Optimizer : adam', fontsize=10)
 plt.ylabel('Loss', fontsize=16)
 plt.xlabel('Epoch', fontsize=14)
 plt.plot(history.history['loss'], color='b', label='Training Loss')
+plt.plot(history.history['mean_squared_error'], color='r', label='Mean square error')
 plt.legend(loc='upper right')
 
 # Save img
