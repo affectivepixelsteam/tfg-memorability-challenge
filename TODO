@@ -1,0 +1,12 @@
+
+1. Split test and train images. DONE
+2. Train autoencoder with saliency. 
+3. Get embeddings from aesthetics model
+4. Train saliency LSTM
+5. Train aeesthetics LSTM
+6. Linear regression with saliency, aesthetics and word2vec
+7. Train autoencoder with aesthetics image
+8. Get embeddings from aesthetics autoencoder
+9. Train autoencoder with one perfect shot images.
+10. Get embeddings from one perfect shot autoencoder.
+11. CNN with aesthetics, saliency and one perfect shot.
