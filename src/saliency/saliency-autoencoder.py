@@ -18,8 +18,8 @@ from keras.optimizers import adam
 from keras.backend.tensorflow_backend import set_session
 
 # Path
-train_videos_folder_path = "/mnt/RESOURCES/saliency/train"
-test_videos_folder_path = "/mnt/RESOURCES/saliency/test"
+train_videos_folder_path = "/mnt/pgth06a/saliency/train"
+test_videos_folder_path = "/mnt/pgth06a/saliency/test"
 
 # Path model and weights
 save_folder_path = '../../models/saliency/'
@@ -130,12 +130,10 @@ history = ae.fit_generator(generator=train_generator,
                     validation_steps = STEP_SIZE_VALIDATION
 )
 
-score, acc = ae.evaluate_generator(generator=test_generator,
-                    steps=STEP_SIZE_TEST,
-                    use_multiprocessing=True)
+scores = ae.evaluate_generator(generator=test_generator,
+                    steps=STEP_SIZE_TEST)
 
-print('Test score:', score)
-print('Test accuracy:', acc)
+print('Test score:', scores)
 
 # Save model
 os.makedirs(save_folder_path, exist_ok=True)
