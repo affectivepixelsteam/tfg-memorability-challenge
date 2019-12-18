@@ -4,8 +4,9 @@ import numpy as np
 from keras.models import model_from_json
 from PIL import Image
 from skimage import transform
+import matplotlib.pyplot as plt
 
-image_path = '/mnt/RESOURCES/saliency/'
+image_path = '/mnt/pgth06a/saliency/'
 model_path = '../../models/saliency/saliency_model.json'
 weight_path = '../../models/saliency/saliency_weight.h5'
 
@@ -27,7 +28,7 @@ def process_image(np_image):
    np_image = np.expand_dims(np_image, axis=0)
    return np_image
 
-input_image = Image.open(image_path + "video3/0001.png")
+input_image = Image.open(image_path + "test/video212/0020.png")
 pixels = process_image(input_image)
 
 # Show that normalization went well.
@@ -37,9 +38,11 @@ print('Min: %.3f, Max: %.3f' % (pixels.min(), pixels.max()))
 # Predict
 ypred = model.predict(pixels)
 
-# Transform predicted array to image
-imagepred = Image.fromarray(ypred)
+# Show images
+f, axarr = plt.subplots(1,2)
 
-# Show both images.
-imagepred.show()
-input_image.show()
+axarr[0].imshow(ypred[0,:,:,0], cmap="gray")
+axarr[1].imshow(pixels[0,:,:,0], cmap="gray")
+
+plt.show()
+
