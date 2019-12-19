@@ -7,12 +7,12 @@ from keras.models import Model
 from PIL import Image
 from skimage import transform
 
-train_image_path = '/mnt/RESOURCES/saliency/train/'
-test_image_path = '/mnt/RESOURCES/saliency/test/'
-train_embeddings_output = '../../data/corpus/devset/dev-set/train_saliency_embeddings.csv'
-teest_embeddings_output = '../../data/corpus/devset/dev-set/test_saliency_embeddings.csv'
-model_path = '../../models/saliency/saliency_model.json'
-weight_path = '../../models/saliency/saliency_weight.h5'
+train_image_path = '/mnt/pgth06a/saliency/train/'
+test_image_path = '/mnt/pgth06a/saliency/test/'
+train_embeddings_output = '../../data/corpus/devset/dev-set/train_saliency_embeddings_splitted.csv'
+test_embeddings_output = '../../data/corpus/devset/dev-set/test_saliency_embeddings_splitted.csv'
+model_path = '../../models/saliency/saliency_autoencoder_model.json'
+weight_path = '../../models/saliency/saliency_autoencoder_weight.h5'
 
 EMBEDDING_LENGTH = 84
 
@@ -20,9 +20,9 @@ EMBEDDING_LENGTH = 84
 def getVideoNames(isTrain):
     # Path
     if isTrain:
-        ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set.csv'
+        ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set_splitted.csv'
     else:
-        ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/test_ground-truth_dev-set.csv'
+        ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/test_ground-truth_dev-set_splitted.csv'
     
     # load dataframes
     df_ground_truth = pd.read_csv(ground_truth_file_path)
@@ -58,7 +58,7 @@ intermediate_output_model = Model(
 
 
 # Get video names
-list_video_names = getVideoNames(True)
+list_video_names = getVideoNames(False)
 
 # Create array in which we will save the embeddings
 data = []
@@ -66,23 +66,25 @@ data = []
 # For each video, lookup for its folder and get from every image in its folder the embedding. Finally, save the embedding in the csv
 for video_name in list_video_names:
   video_name = video_name.split('.')[0]
-  video_folder = os.path.join(image_path, video_name)
+  video_folder = os.path.join(test_image_path, video_name)
+
   images = [f for f in os.listdir(video_folder) if os.path.isfile(os.path.join(video_folder, f))]
 
   for image in images:
-    input_image = Image.open(image)
+    input_image = Image.open(os.path.join(video_folder, image))
     pixels = process_image(input_image)
 
     # Get the embedding
-    embedding = model.predict(pixels)
-    this_data = []
-    
+    embedding = intermediate_output_model.predict(pixels)
+
+    this_data = list(embedding[0])
+
     # Save it in the array
-    this_data.append(video_name)
-    this_data.append(image)
-    this_data.extend(embedding)
+    this_data.insert(0, video_name)
+    this_data.insert(1, image)
+
     data.append(this_data)
 
 # Save data.
 df = pd.DataFrame(data)
-df.to_csv(embeddings_output)
+df.to_csv(test_embeddings_output)
