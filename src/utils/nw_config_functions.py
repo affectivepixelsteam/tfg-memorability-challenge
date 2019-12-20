@@ -1,24 +1,6 @@
 import keras
 import keras.backend as K
 
-
-# def lossFunctCCC4Keras(y_pred, y_true):
-#     pc = metrics.PearsonCorrealtion4Keras(y_pred, y_true)
-#     devP = K.std(y_pred, axis=0)
-#     devT = K.std(y_true, axis=0)
-#     meanP = K.mean(y_pred, axis=0)
-#     meanT = K.mean(y_true, axis=0)
-#     powMeans = K.pow(meanP - meanT, 2)
-#
-#     varP = K.var(y_pred, axis=0)
-#     varT = K.var(y_true, axis=0)
-#     numerator = 2 * pc * devP * devT
-#     denominator = varP + varT + powMeans
-#     CCC = numerator / denominator
-#     CCC = K.mean(CCC)
-#     return -1 * (CCC * CCC)
-
-
 def CCC4keras_newVersion(y_true, y_pred):
     # extracted from : https://gitlab.com/snippets/1730605
     '''Lin's Concordance correlation coefficient: https://en.wikipedia.org/wiki/Concordance_correlation_coefficient
