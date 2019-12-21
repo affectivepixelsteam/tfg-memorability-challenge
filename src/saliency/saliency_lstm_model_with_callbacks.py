@@ -23,6 +23,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
 import matplotlib.pyplot as plt
+import src.metrics.metrics_regression as metrics_regression
 
 config_ses=tf.ConfigProto()
 config_ses.gpu_options.allow_growth=True
@@ -33,15 +34,15 @@ config_ses.log_device_placement=False
 # Hyperparameters
 SEQUENCE_LENGTH = 168
 EMBEDDING_LENGTH = 84
-EPOCHS = 150#15
+EPOCHS = 5#15
 BATCH_SIZE = 224#
 VALIDATION_SPLIT = 0.2
 COMPILER = 'adam' #adagrad, rmsprop
 LEARNING_RATE = 0.0001
-NUM_NEURONS = 50
-LOSS = 'bxentropy' #bxentropy
-METRICS = ['accuracy'] #accuracy
-classification = True
+NUM_NEURONS = 10
+LOSS = 'rms' #bxentropy
+METRICS = ['mse', metrics_regression.PearsonCorrelation4keras,metrics_regression.CCC4Keras] #accuracy
+classification = False
 SEED = 10
 # SAME SEED
 random.seed(SEED)
@@ -163,27 +164,14 @@ print (y_train.shape)
 print(y_test.shape)
 
 
-
-# Y = np.zeros((Y_values.shape[0], 2))
-
-# for i, y in np.ndenumerate(Y_values):
-#     if y > 0.77:
-#         Y[i] = [1, 0]
-#     else:
-#         Y[i] = [0, 1]
-
 # Now define the model
 #initial_input = Input(shape=(SEQUENCE_LENGTH,EMBEDDING_LENGTH))
 input_layer = keras.layers.Input(shape=(SEQUENCE_LENGTH,EMBEDDING_LENGTH),name="input")
-x = LSTM(NUM_NEURONS, dropout=0, recurrent_dropout=0.0, return_sequences=False, name="LSTM_0")(input_layer)
+x = LSTM(units=NUM_NEURONS, return_sequences=False, name="LSTM_0")(input_layer) #dropout=0, recurrent_dropout=0.0,
 output = Dense(NEURONS_LAST_LAYER, activation=ACTIVATION_LAST_LAYER, name="output_layer")(x)
 model = keras.models.Model([input_layer], output)
 model.summary()
-#model = Sequential()
-# model.add(LSTM(SEQUENCE_LENGTH, dropout=0.2, recurrent_dropout=0.2, return_sequences=False))
-# model.add(Dense(1, activation='linear'))
-#keras.models.Model([input_layer], output)
-# adagrad = Adagrad(learning_rate=0.05)
+
 
 #CALLBACKS
 earlyStopping = keras.callbacks.EarlyStopping(monitor='val_loss',#val_loss
@@ -201,12 +189,58 @@ history = model.fit(X_train, y_train_oneHot,
                     validation_split=VALIDATION_SPLIT,callbacks=[tensorboard,lrate_callback,earlyStopping])
 #in order to see the info plotted by the tensorboard callback, open a terminal and type: tensorboard --logdir=/....Ruta aquí.../tfg-memorability-challenge/models/LOGS_saliencyLOGS_saliency/
 
-model.summary()
-score, acc = model.evaluate(X_test, y_test_oneHot,
-                            batch_size=BATCH_SIZE)
 
-print('Test score with LSTM:', score)
-print('Test accuracy with LSTM:', acc)
+#SAVE RESULTS & PLOTS
+if(classification):
+    print("done")
+    score_test, accuracy_test = model.evaluate(X_test, y_test_oneHot,
+                                                             batch_size=BATCH_SIZE)
+
+    score_train, accuracy_train = model.evaluate(X_train, y_train_oneHot,
+                                                                 batch_size=BATCH_SIZE)
+    print('Test score with LSTM:', score_test)
+    print('Test acc with LSTM:', accuracy_test)
+
+    headers_results = ["score_train", "acc_train", "score_test", "acc_test"]
+    df_results = pd.DataFrame([[score_train, accuracy_train, score_test, accuracy_test]],columns=headers_results)
+    #obtain predictions:
+    pred_test = model.predict(X_test,batch_size=X_train.shape[0])
+    pred_test = pred_test.reshape(-1)
+    true = y_test_oneHot.reshape(-1)
+
+else:
+
+    score_test, mse_test, CC_test, CCC_test= model.evaluate(X_test, y_test_oneHot,
+                                batch_size=X_test.shape[0])
+
+    score_train, mse_train, CC_train, CCC_train = model.evaluate(X_train, y_train_oneHot,
+                                batch_size=X_train.shape[0])
+
+    headers_results = ["score_train","mse_train", "CC_train", "CCC_train", "score_test","mse_test", "CC_test", "CCC_test"]
+    df_results = pd.DataFrame([[score_train,mse_train, CC_train, CCC_train, score_test,mse_test, CC_test, CCC_test]], columns=headers_results)
+    # obtain predictions: ----CHECKING THAT KERAS METHODS WORK-----------
+    pred_test = model.predict(X_test, batch_size=X_test.shape[0])
+    pred_test = pred_test.reshape(-1)
+    true = y_test_oneHot.reshape(-1)
+    CC_test = metrics_regression.PC_numpy(y_true=true, y_pred=pred_test)
+    CCC_test = metrics_regression.CCC(y_true=true, y_pred=pred_test)
+
+    print('Test score with LSTM:', score_test)
+    print('Test mse with LSTM:', mse_test)
+    print('Test CC with LSTM:', CC_test)
+    print('Test CCC with LSTM:', CCC_test)
+
+    pred_train = model.predict(X_train, batch_size=X_train.shape[0])
+    pred_train = pred_train.reshape(-1)
+    true = y_train_oneHot.reshape(-1)
+    CC_train = metrics_regression.PC_numpy(y_true=true, y_pred=pred_train)
+    CCC_train = metrics_regression.CCC(y_true=true, y_pred=pred_train)
+    print('train score with LSTM:', score_train)
+    print('train mse with LSTM:', mse_train)
+    print('train CC with LSTM:', CC_train)
+    print('train CCC with LSTM:', CCC_train)
+
+df_results.to_csv(log_dir+"/info_results.csv", index=False)
 
 
 with open(model_save_path, 'w+') as save_file:
