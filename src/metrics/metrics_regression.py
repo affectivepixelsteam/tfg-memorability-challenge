@@ -1,6 +1,8 @@
 import numpy as np
 import keras.backend as K
+import tensorflow as tf
 import scipy
+from scipy.stats import spearmanr
 
 def PearsonCorrelation4keras(y_true, y_pred): #CC FOR KERAS
     #normalise
@@ -31,6 +33,10 @@ def CCC4Keras(y_pred, y_true):
     denominator = varP+varT+powMeans
     CCC = numerator/denominator
     return K.sum(CCC)
+
+def spearman_rank_correlation(y_pred, y_true):
+    return ( tf.py_function(spearmanr, [tf.cast(y_true, tf.float32), 
+                        tf.cast(y_pred, tf.float32)], Tout = tf.float32) )
 
 
 #--------------------------FUNCTIONS NOT FOR KERAS---------------------------------------
