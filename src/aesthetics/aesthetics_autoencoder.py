@@ -31,7 +31,7 @@ img_file_path = '../../figures/aesthetics-autoencoder_train_loss.png'
 
 # Hyperparameters
 img_size = (384, 224)
-input_size = (384, 224, 1)
+input_size = (384, 224, 3)
 pooling_size = (2,2)
 
 # Allow GPU growth
@@ -61,7 +61,7 @@ def train_val_images():
     train_generator = train_im.flow_from_directory (
             train_videos_folder_path, 
              target_size=img_size,
-             color_mode='RGB',
+             color_mode='rgb',
              batch_size=16,
              shuffle = True,
              class_mode='input',
@@ -70,7 +70,7 @@ def train_val_images():
     validation_generator = train_im.flow_from_directory (
             train_videos_folder_path, 
              target_size=img_size,
-             color_mode='RGB',
+             color_mode='rgb',
              batch_size=16,
              shuffle = True,
              class_mode='input',
@@ -81,7 +81,7 @@ def test_images():
     test_generator = test_im.flow_from_directory (
             test_videos_folder_path, 
              target_size=img_size,
-             color_mode='RGB',
+             color_mode='rgb',
              batch_size=16,
              shuffle = True,
              class_mode='input')
@@ -118,10 +118,10 @@ ae.compile(optimizer="adam", loss="binary_crossentropy", metrics=['mean_squared_
 
 #Train it by providing training images
 train_generator, validation_generator = train_val_images()
-test_generator = test_images()
+# test_generator = test_images()
 STEP_SIZE_TRAIN = train_generator.n//train_generator.batch_size
 STEP_SIZE_VALIDATION = validation_generator.n//validation_generator.batch_size
-STEP_SIZE_TEST = test_generator.n//test_generator.batch_size
+# STEP_SIZE_TEST = test_generator.n//test_generator.batch_size
 
 history = ae.fit_generator(generator=train_generator,
                     steps_per_epoch=STEP_SIZE_TRAIN,
@@ -130,12 +130,12 @@ history = ae.fit_generator(generator=train_generator,
                     validation_steps = STEP_SIZE_VALIDATION
 )
 
-score, acc = ae.evaluate_generator(generator=test_generator,
-                    steps=STEP_SIZE_TEST,
-                    use_multiprocessing=True)
+# score, acc = ae.evaluate_generator(generator=test_generator,
+#                     steps=STEP_SIZE_TEST,
+#                     use_multiprocessing=True)
 
-print('Test score:', score)
-print('Test accuracy:', acc)
+# print('Test score:', score)
+# print('Test accuracy:', acc)
 
 # Save model
 os.makedirs(save_folder_path, exist_ok=True)
