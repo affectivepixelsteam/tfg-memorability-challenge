@@ -47,9 +47,6 @@ def data_to_input(df_embeddings, df_ground_truth):
         i += 1
 
     return df_input
-
-def tf_pearson(y_true, y_pred):
-    return tf.contrib.metrics.streaming_pearson_correlation(y_pred, y_true)[1]
     
 # Load dataframes
 df_train_embeddings = pd.read_csv(train_embeddings_file_path)

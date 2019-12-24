@@ -1,5 +1,8 @@
 
 # Implement a basic LSTM model to predict memorability from saliency
+import sys
+sys.path.insert(0, '../../')
+
 import pandas as pd
 import numpy as np
 import numpy.random as rand
@@ -34,16 +37,17 @@ config_ses.log_device_placement=False
 # Hyperparameters
 SEQUENCE_LENGTH = 168
 EMBEDDING_LENGTH = 84
-EPOCHS = 5#15
+EPOCHS = 40#15
 BATCH_SIZE = 224#
 VALIDATION_SPLIT = 0.2
-COMPILER = 'adam' #adagrad, rmsprop
-LEARNING_RATE = 0.0001
-NUM_NEURONS = 10
-LOSS = 'rms' #bxentropy
-METRICS = ['mse', metrics_regression.PearsonCorrelation4keras,metrics_regression.CCC4Keras] #accuracy
+COMPILER = 'adagrad' #adagrad, rmsprop
+LEARNING_RATE = 0.001
+NUM_NEURONS = 168
+LOSS = 'mean_squared_error' #bxentropy, rms
+METRICS = ['mse', metrics_regression.PearsonCorrelation4keras, metrics_regression.spearman_rank_correlation] #accuracy
 classification = False
 SEED = 10
+
 # SAME SEED
 random.seed(SEED)
 rand.seed(SEED)
@@ -84,9 +88,6 @@ def data_to_input(df_embeddings, df_ground_truth):
 
     return df_input
 
-def tf_pearson(y_true, y_pred):
-    return tf.contrib.metrics.streaming_pearson_correlation(y_pred, y_true)[1]
-
 def step_decay(epoch):
    initial_lrate = LEARNING_RATE
    drop = 0.5
@@ -125,8 +126,8 @@ else:
     X_train = data_to_input(df_train_embeddings, df_train_ground_truth)
     X_test = data_to_input(df_test_embeddings, df_test_ground_truth)
 
-    y_train = df_train_ground_truth['long-term_memorability'].to_numpy()
-    y_test = df_test_ground_truth['long-term_memorability'].to_numpy()
+    y_train = df_train_ground_truth['short-term_memorability'].to_numpy()
+    y_test = df_test_ground_truth['short-term_memorability'].to_numpy()
 
     #SAVE FILES
     np.save(save_processed_files+"X_train.npy", X_train)
@@ -153,16 +154,7 @@ else:
     y_test_oneHot = y_test
     y_train_oneHot = y_train
     NEURONS_LAST_LAYER = 1
-    ACTIVATION_LAST_LAYER = 'linear'
-
-
-print (X_train[0,:,:])
-print (y_train[0])
-print (X_train.shape)
-print(X_test.shape)
-print (y_train.shape)
-print(y_test.shape)
-
+    ACTIVATION_LAST_LAYER = 'sigmoid'
 
 # Now define the model
 #initial_input = Input(shape=(SEQUENCE_LENGTH,EMBEDDING_LENGTH))
@@ -210,35 +202,36 @@ if(classification):
 
 else:
 
-    score_test, mse_test, CC_test, CCC_test= model.evaluate(X_test, y_test_oneHot,
+    score_test, mse_test, pearson_test, spearman_test= model.evaluate(X_test, y_test_oneHot,
                                 batch_size=X_test.shape[0])
 
-    score_train, mse_train, CC_train, CCC_train = model.evaluate(X_train, y_train_oneHot,
+    score_train, mse_train, pearson_train, spearman_train = model.evaluate(X_train, y_train_oneHot,
                                 batch_size=X_train.shape[0])
 
-    headers_results = ["score_train","mse_train", "CC_train", "CCC_train", "score_test","mse_test", "CC_test", "CCC_test"]
-    df_results = pd.DataFrame([[score_train,mse_train, CC_train, CCC_train, score_test,mse_test, CC_test, CCC_test]], columns=headers_results)
+    headers_results = ["score_train","mse_train", "pearson_train", "spearman_train", "score_test","mse_test", "pearson_test", "spearman_test"]
+    df_results = pd.DataFrame([[score_train,mse_train, pearson_train, spearman_train, score_test,mse_test, pearson_test, spearman_test]], columns=headers_results)
     # obtain predictions: ----CHECKING THAT KERAS METHODS WORK-----------
-    pred_test = model.predict(X_test, batch_size=X_test.shape[0])
-    pred_test = pred_test.reshape(-1)
-    true = y_test_oneHot.reshape(-1)
-    CC_test = metrics_regression.PC_numpy(y_true=true, y_pred=pred_test)
-    CCC_test = metrics_regression.CCC(y_true=true, y_pred=pred_test)
+    # pred_test = model.predict(X_test, batch_size=X_test.shape[0])
+    # pred_test = pred_test.reshape(-1)
+    # true = y_test_oneHot.reshape(-1)
+    # CC_test = metrics_regression.PC_numpy(y_true=true, y_pred=pred_test)
+    # CCC_test = metrics_regression.CCC(y_true=true, y_pred=pred_test)
 
     print('Test score with LSTM:', score_test)
     print('Test mse with LSTM:', mse_test)
-    print('Test CC with LSTM:', CC_test)
-    print('Test CCC with LSTM:', CCC_test)
+    print('Test pearson with LSTM:', pearson_test)
+    print('Test spearman with LSTM:', spearman_test)
 
-    pred_train = model.predict(X_train, batch_size=X_train.shape[0])
-    pred_train = pred_train.reshape(-1)
-    true = y_train_oneHot.reshape(-1)
-    CC_train = metrics_regression.PC_numpy(y_true=true, y_pred=pred_train)
-    CCC_train = metrics_regression.CCC(y_true=true, y_pred=pred_train)
+    # pred_train = model.predict(X_train, batch_size=X_train.shape[0])
+    # pred_train = pred_train.reshape(-1)
+    # true = y_train_oneHot.reshape(-1)
+    # CC_train = metrics_regression.PC_numpy(y_true=true, y_pred=pred_train)
+    # CCC_train = metrics_regression.CCC(y_true=true, y_pred=pred_train)
+
     print('train score with LSTM:', score_train)
     print('train mse with LSTM:', mse_train)
-    print('train CC with LSTM:', CC_train)
-    print('train CCC with LSTM:', CCC_train)
+    print('train pearson with LSTM:', pearson_train)
+    print('train spearman with LSTM:', spearman_train)
 
 df_results.to_csv(log_dir+"/info_results.csv", index=False)
 
