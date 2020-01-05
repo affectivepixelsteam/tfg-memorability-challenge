@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '../../')
 
 # Implement a basic LSTM model to predict memorability from saliency
 import pandas as pd
