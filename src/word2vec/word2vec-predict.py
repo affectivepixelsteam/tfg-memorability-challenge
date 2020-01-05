@@ -5,12 +5,10 @@ from keras.models import model_from_json
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
-
-ROOT_PATH = "/mnt/RESOURCES/TFG_TFM_CORPUS/"
-model_path = ROOT_PATH+'models/word2vec/word2vec-model.json'
-weight_path = ROOT_PATH+'models/word2vec/word2vec-weight.h5'
-captions_file_path = ROOT_PATH+'corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
-ground_truth_file_path = ROOT_PATH+'corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
+model_path = '../../models/word2vec/word2vec-model.json'
+weight_path = '../../models/word2vec/word2vec-weight.h5'
+captions_file_path = '../../data/corpus/devset/dev-set/dev-set_video-captions-cleanup.csv'
+ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/ground-truth_dev-set.csv'
 
 # load json and create model
 with open(model_path, 'r') as model_file:
