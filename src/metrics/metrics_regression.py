@@ -39,6 +39,21 @@ def spearman_rank_correlation(y_pred, y_true):
                         tf.cast(y_pred, tf.float32)], Tout = tf.float32) )
 
 
+def spearman_as_loss(y_pred, y_true):
+    spearman_r, update_op = spearman_rank_correlation(y_pred, y_true)
+    # find all variables created for this metric
+    metric_vars = [i for i in tf.local_variables() if 'spearman_r'  in i.name.split('/')]
+
+    # Add metric variables to GLOBAL_VARIABLES collection.
+    # They will be initialized for new session.
+    for v in metric_vars:
+        tf.add_to_collection(tf.GraphKeys.GLOBAL_VARIABLES, v)
+
+    # force to update metric values
+    with tf.control_dependencies([update_op]):
+        spearman_r = tf.identity(spearman_r)
+        return 1-spearman_r**2
+
 #--------------------------FUNCTIONS NOT FOR KERAS---------------------------------------
 def PC_numpy(y_pred, y_true):
     pred = y_pred.reshape(-1)
