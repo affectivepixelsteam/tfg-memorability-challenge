@@ -52,7 +52,7 @@ set_session(sess)  # set this TensorFlow session as the default session for Kera
 
 # Hyperparameters
 use_tuner = False
-classifier = True
+classifier = False
 EPOCHS = 20
 BATCH_SIZE = 256
 VALIDATION_SPLIT = 0.2
@@ -66,23 +66,23 @@ else:
     LOSS = 'mean_squared_error'
     ACTIVATION_FUNCTION = 'sigmoid'
 
-LSTM_NEURONS = 20
+LSTM_NEURONS = 50
 RANDOM_STATE = 44
 
 # label = 'long-term_memorability'
 # MEAN_LABEL = 0.7628
 
-label = 'short-term_memorability'
+label = 'long-term_memorability'
 MEAN_LABEL = 0.8544
 
 # Parameters: {'dropout': 0.3393013324064793, 'epochs': 21, 'learning_rate': 0.030109132551140977, 'lstm_neurons': 11, 'recurrent_dropout': 0.31691807115857495}
 
 # Path to file
-train_captions_file_path = '../../data/corpus/devset/dev-set/train_dev-set_video-captions-cleanup_splitted.csv'
-test_captions_file_path = '../../data/corpus/devset/dev-set/test_dev-set_video-captions-cleanup_splitted.csv'
+train_captions_file_path = '../../data/corpus/devset/dev-set/train_dev-set_video-captions-cleanup.csv'
+test_captions_file_path = '../../data/corpus/devset/dev-set/test_dev-set_video-captions-cleanup.csv'
 embeddings_file_path = '../../data/corpus/devset/dev-set/embeddings-for-each-word.csv'
-train_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set_splitted.csv'
-test_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/test_ground-truth_dev-set_splitted.csv'
+train_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set.csv'
+test_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/test_ground-truth_dev-set.csv'
 
 # Path model and weights
 model_save_path = '../../models/word2vec/word2vec-model.json'
@@ -91,12 +91,16 @@ weight_save_path = '../../models/word2vec/word2vec-weight.h5'
 # Path for image
 img_file_path = '../../figures/word2vec_train_loss_class.png'
 
+# Path save predictions
+predictions_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_predictions.csv'
+
 # Load dataframes
 df_embeddings = pd.read_csv(embeddings_file_path)
 df_train_captions = pd.read_csv(train_captions_file_path)
 df_test_captions = pd.read_csv(test_captions_file_path)
 df_train_ground_truth = pd.read_csv(train_ground_truth_file_path)
 df_test_ground_truth = pd.read_csv(test_ground_truth_file_path)
+df_predictions = pd.read_csv(predictions_file_path)
 
 # So first we get every word in our captions and stored them without repetition.
 # Filter whitespaces too.
@@ -211,6 +215,10 @@ else:
         save_file.write(model.to_json())
 
     model.save_weights(weight_save_path)
+
+    y_train_pred = model.predict(X_train)
+    df_predictions["word2vec_" + label] = y_train_pred
+    df_predictions.to_csv(predictions_file_path, index=False)
 
     # Plotting lost
     plt.suptitle('Optimizer : adagrad', fontsize=10)
