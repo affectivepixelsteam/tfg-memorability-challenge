@@ -34,8 +34,11 @@ for db_type in  [True, False]:
             train_embeddings_file_path = '../../data/corpus/devset/dev-set/train_saliency_embeddings_annotations.csv'
             test_embeddings_file_path = '../../data/corpus/devset/dev-set/test_saliency_embeddings_annotations.csv'
 
+        predictions_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_predictions.csv'
+
         df_train_embeddings = pd.read_csv(train_embeddings_file_path)
         df_test_embeddings = pd.read_csv(test_embeddings_file_path)
+        df_predictions = pd.read_csv(predictions_file_path)
 
         X_train = df_train_embeddings.iloc[:,3:87].to_numpy()
         X_test = df_test_embeddings.iloc[:,3:87].to_numpy()
@@ -101,3 +104,7 @@ for db_type in  [True, False]:
         print('XGB MSE VIDEO ' + str(mse))
         print('XGB VIDEO ' + str(spearman))
         print('XGB VIDEO pearson' + str(pearson))
+
+        y_train_pred = xgb_model.predict(X_train)
+        df_predictions["saliency_xgb_" + label] = y_train_pred
+        df_predictions.to_csv(predictions_file_path, index=False)
