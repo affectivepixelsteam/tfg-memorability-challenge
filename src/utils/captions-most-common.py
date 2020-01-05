@@ -18,7 +18,7 @@ captions_splitted = captions_file["captions"].str.cat(sep=' ').split(' ')
 count = Counter(captions_splitted)
 
 # Plotting. Black magic
-labels, values = zip(*count.most_common(100))
+labels, values = zip(*count.most_common(50))
 indexes = np.arange(len(labels))
 width = 1
 
