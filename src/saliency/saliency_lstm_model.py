@@ -1,5 +1,9 @@
 
 # Implement a basic LSTM model to predict memorability from saliency
+
+import sys
+sys.path.insert(0, '../../')
+
 import pandas as pd
 import numpy as np
 
@@ -16,18 +20,38 @@ from sklearn.model_selection import train_test_split
 
 import matplotlib.pyplot as plt
 
+import src.metrics.metrics_regression as metrics_regression
+
+from keras import backend as K
+def correlation_coefficient_loss(y_true, y_pred):
+    x = y_true
+    y = y_pred
+    mx = K.mean(x)
+    my = K.mean(y)
+    xm, ym = x-mx, y-my
+    r_num = K.sum(tf.multiply(xm,ym))
+    r_den = K.sqrt(tf.multiply(K.sum(K.square(xm)), K.sum(K.square(ym))))
+    r = r_num / r_den
+
+    r = K.maximum(K.minimum(r, 1.0), -1.0)
+    return 1 - K.square(r)
+
 # Hyperparameters
 SEQUENCE_LENGTH = 168
+LSTM_UNITS = 80
 EMBEDDING_LENGTH = 84
-EPOCHS = 15
-BATCH_SIZE = 64
+EPOCHS = 20
+BATCH_SIZE = 128
 VALIDATION_SPLIT = 0.2
+METRICS = [metrics_regression.spearman_rank_correlation, metrics_regression.PearsonCorrelation4keras]
+loss = 'mean_squared_error'
+label = 'long-term_memorability'
 
 # Path to file
-train_embeddings_file_path = '../../data/corpus/devset/dev-set/train_saliency_embeddings_splitted.csv'
-test_embeddings_file_path = '../../data/corpus/devset/dev-set/test_saliency_embeddings_splitted.csv'
-train_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set_splitted.csv'
-test_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/test_ground-truth_dev-set_splitted.csv'
+train_embeddings_file_path = '../../data/corpus/devset/dev-set/train_saliency_embeddings.csv'
+test_embeddings_file_path = '../../data/corpus/devset/dev-set/test_saliency_embeddings.csv'
+train_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/train_ground-truth_dev-set.csv'
+test_ground_truth_file_path = '../../data/corpus/devset/dev-set/ground-truth/test_ground-truth_dev-set.csv'
 
 # Path model and weights
 model_save_path = '../../models/saliency/saliency-lstm-model.json'
@@ -69,15 +93,8 @@ def to_classifier(x) :
         return 1
     return 0
 
-y_train = df_train_ground_truth['long-term_memorability'].to_numpy()
-y_test = df_test_ground_truth['long-term_memorability'].to_numpy()
-
-print (X_train[0,:,:])
-print (y_train[0])
-print (X_train.shape)
-print(X_test.shape)
-print (y_train.shape)
-print(y_test.shape)
+y_train = df_train_ground_truth[label].to_numpy()
+y_test = df_test_ground_truth[label].to_numpy()
 
 # Y = np.zeros((Y_values.shape[0], 2))
 
@@ -89,11 +106,11 @@ print(y_test.shape)
 
 # Now define the model
 model = Sequential()
-model.add(LSTM(SEQUENCE_LENGTH, dropout=0.2, recurrent_dropout=0.2, return_sequences=False))
-model.add(Dense(1, activation='linear'))
+model.add(LSTM(LSTM_UNITS, dropout=0.2, recurrent_dropout=0.2, return_sequences=False))
+model.add(Dense(1, activation='sigmoid'))
 
 # adagrad = Adagrad(learning_rate=0.05)
-model.compile(optimizer='adagrad', loss='mean_squared_error', metrics=['mean_squared_error'])
+model.compile(optimizer='adagrad', loss=loss, metrics=METRICS)
 
 history = model.fit(X_train, y_train,
                     epochs=EPOCHS,
@@ -101,11 +118,13 @@ history = model.fit(X_train, y_train,
                     validation_split=VALIDATION_SPLIT)
 
 model.summary()
-score, acc = model.evaluate(X_test, y_test,
+
+score, spearman, pearson = model.evaluate(X_test, y_test,
                             batch_size=BATCH_SIZE)
 
 print('Test score with LSTM:', score)
-print('Test accuracy with LSTM:', acc)
+print('Test spearman with LSTM:', spearman)
+print('Test pearson with LSTM:', pearson)
 
 
 with open(model_save_path, 'w+') as save_file:
